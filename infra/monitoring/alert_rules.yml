@@ -1,0 +1,27 @@
+groups:
+  - name: fincore_financial_alerts
+    rules:
+      - alert: LedgerImbalanceDetected
+        expr: fincore_ledger_imbalance_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Double-entry ledger imbalance detected"
+          description: "Debit and credit totals diverged. Freeze automated settlement immediately."
+
+      - alert: HighTransferLatencyP95
+        expr: histogram_quantile(0.95, rate(fincore_transfer_duration_ms_bucket[5m])) > 500
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Transfer p95 latency exceeds 500ms"
+
+      - alert: WebhookVerificationFailureSpike
+        expr: increase(fincore_webhook_invalid_signature_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "Elevated invalid payment webhook signatures detected"

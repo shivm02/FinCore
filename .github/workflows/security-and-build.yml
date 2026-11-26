@@ -1,0 +1,38 @@
+name: Container Build, Image Scan & Signed Artifacts
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: api, context: ./apps/api }
+          - { name: web, context: ./apps/web }
+          - { name: analytics, context: ./services/analytics }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build container image
+        run: docker build -t fincore-${{ matrix.service.name }}:${{ github.sha }} ${{ matrix.service.context }}
+      - name: Scan image with Trivy (fail on CRITICAL)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: fincore-${{ matrix.service.name }}:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: CRITICAL
+      - name: Generate build provenance attestation
+        uses: actions/attest-build-provenance@v1
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        with:
+          subject-name: fincore-${{ matrix.service.name }}
+          subject-digest: sha256:${{ github.sha }}

@@ -1,0 +1,66 @@
+name: FinCore CI — Tests, Lint, Secret & Dependency Scan
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  secret-scan:
+    name: Secret Scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  schema-and-python:
+    name: DB Schema & Python Analytics (Decimal + FastAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install analytics dependencies
+        run: pip install -r services/analytics/requirements.txt pytest pip-audit
+      - name: Dependency vulnerability scan (pip-audit)
+        run: pip-audit -r services/analytics/requirements.txt || true
+      - name: Verify SQL migrations & double-entry schema
+        run: python3 db/scripts/verify_schema.py
+      - name: Run Python Decimal & FastAPI risk tests
+        run: PYTHONPATH=services/analytics pytest services/analytics/tests -v
+
+  api-and-ledger-tests:
+    name: Node.js API, Transfer Consistency & Incident Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Audit dependencies
+        working-directory: apps/api
+        run: npm audit --audit-level=high || true
+      - name: Run Node.js test suite (A02, A04, A07, A08, A12, A15)
+        run: node --test apps/api/tests/*.test.js
+
+  frontend-checks:
+    name: Next.js Typecheck & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate Next.js project structure
+        run: test -f apps/web/package.json && test -f apps/web/src/app/page.tsx

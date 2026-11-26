@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - alert_rules.yml
+
+scrape_configs:
+  - job_name: fincore-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:4000"]
+
+  - job_name: fincore-analytics
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["analytics:8000"]

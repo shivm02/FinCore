@@ -1,0 +1,8 @@
+# FinCore Change Governance (Assessment 10)
+# Mandatory dual review for financial ledger, migrations, and calculation logic
+/db/migrations/                       @fincore-db-reviewers @fincore-finance-lead
+/apps/api/src/modules/ledger/         @fincore-backend-leads @fincore-finance-lead
+/apps/api/src/modules/transfers/      @fincore-backend-leads @fincore-finance-lead
+/services/analytics/app/calculations/ @fincore-python-leads @fincore-finance-lead
+/.github/workflows/                   @fincore-security-team
+/infra/                               @fincore-platform-team
