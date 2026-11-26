@@ -73,7 +73,8 @@ class PaymentIntegrationService {
     }
     for (const existing of this.paymentIntents.values()) {
       if (idempotencyKey && existing.idempotencyKey === idempotencyKey) {
-        return { ...existing, idempotentReplay: true };
+        const { amountUnits: _internal, ...publicExisting } = existing;
+        return { ...publicExisting, idempotentReplay: true };
       }
     }
     const id = crypto.randomUUID();
@@ -91,7 +92,8 @@ class PaymentIntegrationService {
       createdAt: new Date().toISOString(),
     };
     this.paymentIntents.set(id, intent);
-    return intent;
+    const { amountUnits: _internal, ...publicIntent } = intent;
+    return publicIntent;
   }
 
   async handleProviderWebhook({ rawBody, signatureHeader, requestId }) {

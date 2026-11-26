@@ -1,0 +1,80 @@
+=== FinCore Project 02 — Captured Automated Verification Evidence ===
+Timestamp: 2026-11-26T17:08:06Z
+
+--- 1. Assessment 03: PostgreSQL Schema & Double-Entry Trigger Verification ---
+[PASS] Verified 3 SQL migrations, 18 tables, NUMERIC(19,4) precision, immutability triggers, and double-entry balance invariant.
+
+--- 2. Assessments 02, 04, 07, 08, 12, 15 & Capstone: Node.js Test Suites ---
+TAP version 13
+# Subtest: Assessment 04: scrypt password hashing, MFA simulation, JWT refresh & revocation
+ok 1 - Assessment 04: scrypt password hashing, MFA simulation, JWT refresh & revocation
+  ---
+  duration_ms: 89.326612
+  ...
+# Subtest: Assessment 04: 5-role RBAC enforcement, resource ownership, and sensitive-action reauth
+ok 2 - Assessment 04: 5-role RBAC enforcement, resource ownership, and sensitive-action reauth
+  ---
+  duration_ms: 428.588965
+  ...
+# Subtest: Capstone Challenge & Assessment 15: concurrent transfers, duplicate webhooks, failed/mismatched settlement, reversal & recovery
+ok 3 - Capstone Challenge & Assessment 15: concurrent transfers, duplicate webhooks, failed/mismatched settlement, reversal & recovery
+  ---
+  duration_ms: 5.832362
+  ...
+# Subtest: Assessment 07 & 12: atomic transfer, idempotency replay, conflict, insufficient funds, and optimistic locking
+ok 4 - Assessment 07 & 12: atomic transfer, idempotency replay, conflict, insufficient funds, and optimistic locking
+  ---
+  duration_ms: 4.722189
+  ...
+# Subtest: Assessment 07 & 12: 10 concurrent transfers prevent double-spend and maintain balance invariant
+ok 5 - Assessment 07 & 12: 10 concurrent transfers prevent double-spend and maintain balance invariant
+  ---
+  duration_ms: 1.796338
+  ...
+# Subtest: Assessment 03 & 12: reversal posts offsetting entries without mutating originals & rejects unbalanced attempts
+ok 6 - Assessment 03 & 12: reversal posts offsetting entries without mutating originals & rejects unbalanced attempts
+  ---
+  duration_ms: 1.245281
+  ...
+# Subtest: Assessment 02 & 08: Full HTTP lifecycle, signed webhook verification, replay deduplication & safe errors
+ok 7 - Assessment 02 & 08: Full HTTP lifecycle, signed webhook verification, replay deduplication & safe errors
+  ---
+  duration_ms: 4175.975817
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5235.067948
+
+--- 3. Assessments 05 & 06: Python Decimal & FastAPI Risk Analytics Suite ---
+test_health_endpoints (test_calculations_and_risk.TestFastApiRiskAnalytics.test_health_endpoints) ... ok
+test_high_risk_velocity_and_disclaimer (test_calculations_and_risk.TestFastApiRiskAnalytics.test_high_risk_velocity_and_disclaimer) ... ok
+test_invalid_negative_amount_returns_422 (test_calculations_and_risk.TestFastApiRiskAnalytics.test_invalid_negative_amount_returns_422) ... ok
+test_operations_report_aggregation (test_calculations_and_risk.TestFastApiRiskAnalytics.test_operations_report_aggregation) ... ok
+test_unauthorized_without_service_token (test_calculations_and_risk.TestFastApiRiskAnalytics.test_unauthorized_without_service_token) ... ok
+test_accrued_interest_exact_decimal (test_calculations_and_risk.TestFinancialCalculations.test_accrued_interest_exact_decimal) ... ok
+test_bankers_rounding_boundary (test_calculations_and_risk.TestFinancialCalculations.test_bankers_rounding_boundary) ... ok
+test_fee_min_and_max_caps (test_calculations_and_risk.TestFinancialCalculations.test_fee_min_and_max_caps) ... ok
+test_precision_benchmark (test_calculations_and_risk.TestFinancialCalculations.test_precision_benchmark) ... ok
+test_reconcile_detects_mismatches_and_missing (test_calculations_and_risk.TestFinancialCalculations.test_reconcile_detects_mismatches_and_missing) ... ok
+test_rejects_binary_float_input (test_calculations_and_risk.TestFinancialCalculations.test_rejects_binary_float_input) ... ok
+test_statement_zero_drift_sum (test_calculations_and_risk.TestFinancialCalculations.test_statement_zero_drift_sum) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.028s
+
+OK
+
+--- 4. Assessment 14: Encrypted Backup & Restore Drill ---
+
+--- 4. Assessment 14: Encrypted Backup & Restore Drill ---
+
+--- 4. Assessment 14: Encrypted Backup & Restore Drill ---
+[OK] Encrypted backup created: ./backups/fincore_20261126T170858Z.sql.gz.enc
+./backups/fincore_20261126T170858Z.sql.gz.enc: OK
+[PASS] Restore drill succeeded (369 SQL lines verified).
