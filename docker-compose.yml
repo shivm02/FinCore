@@ -1,0 +1,118 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fincore_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-fincore_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - fincore_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fincore_app} -d ${POSTGRES_DB:-fincore_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD}"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - fincore_internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics:
+    build:
+      context: ./services/analytics
+    restart: unless-stopped
+    environment:
+      ANALYTICS_SERVICE_TOKEN: ${ANALYTICS_SERVICE_TOKEN:?set ANALYTICS_SERVICE_TOKEN}
+      APP_ENV: ${APP_ENV:-local}
+    networks:
+      - fincore_internal
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      analytics:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      API_PORT: 4000
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}
+      ANALYTICS_INTERNAL_URL: http://analytics:8000
+      ANALYTICS_SERVICE_TOKEN: ${ANALYTICS_SERVICE_TOKEN}
+      PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:?set PAYMENT_WEBHOOK_SECRET}
+    ports:
+      - "127.0.0.1:4000:4000"
+    networks:
+      - fincore_edge
+      - fincore_internal
+
+  worker:
+    build:
+      context: ./apps/api
+    command: ["node", "src/workers/reconciliationWorker.js"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      ANALYTICS_INTERNAL_URL: http://analytics:8000
+      ANALYTICS_SERVICE_TOKEN: ${ANALYTICS_SERVICE_TOKEN}
+    networks:
+      - fincore_internal
+
+  web:
+    build:
+      context: ./apps/web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+      NEXT_PUBLIC_SIMULATION_BANNER: "true"
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - fincore_edge
+
+volumes:
+  pg_data:
+  redis_data:
+
+networks:
+  fincore_edge:
+    driver: bridge
+  fincore_internal:
+    driver: bridge
+    internal: true
