@@ -78,3 +78,5 @@ OK
 [OK] Encrypted backup created: ./backups/fincore_20261126T170858Z.sql.gz.enc
 ./backups/fincore_20261126T170858Z.sql.gz.enc: OK
 [PASS] Restore drill succeeded (369 SQL lines verified).
+[ENV CHECK] Validating configuration contract for environment: staging
+[PASS] No .env secret file tracked in git; .env.example present.
