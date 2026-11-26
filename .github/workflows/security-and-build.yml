@@ -24,7 +24,7 @@ jobs:
       - name: Build container image
         run: docker build -t fincore-${{ matrix.service.name }}:${{ github.sha }} ${{ matrix.service.context }}
       - name: Scan image with Trivy (fail on CRITICAL)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: fincore-${{ matrix.service.name }}:${{ github.sha }}
           format: table
